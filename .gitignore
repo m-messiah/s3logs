@@ -1,0 +1,5 @@
+.idea
+*.py[co]
+MAINFEST
+build
+dist
