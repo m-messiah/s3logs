@@ -3,3 +3,4 @@
 MAINFEST
 build
 dist
+*.conf
