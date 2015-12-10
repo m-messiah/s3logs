@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 # coding=utf-8
-import logging
-from datetime import datetime
-from math import ceil
-from os import listdir, path, stat
-from platform import node
-from sys import argv
-
+from filechunkio import FileChunkIO
 from boto.exception import S3ResponseError
 from boto.s3.connection import S3Connection, OrdinaryCallingFormat
-from filechunkio import FileChunkIO
+from datetime import date, timedelta
+from os import listdir, path, stat
+from sys import argv
+import logging
+from platform import node
+from math import ceil
 
 try:
     from configparser import SafeConfigParser, Error as parseError
@@ -23,7 +22,7 @@ class S3Pusher(object):
         self.suffix = ".0.gz"
         self.key_suffix = ".gz"
         self.directory = "."
-        self.filename = datetime.now().strftime("%Y-%m-%d")
+        self.filename = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
         self.bucket = None
         self.map = {}
         self.chunk_size = 52428800
@@ -47,8 +46,7 @@ class S3Pusher(object):
                 aws_access_key_id=configs.get("S3", "access_key"),
                 aws_secret_access_key=configs.get("S3", "secret_key"),
                 host=configs.get("S3", "host"),
-                calling_format=OrdinaryCallingFormat(),
-                is_secure=True)
+                calling_format=OrdinaryCallingFormat())
             bucket_name = configs.get("S3", "bucket")
             try:
                 bucket = conn.get_bucket(bucket_name)

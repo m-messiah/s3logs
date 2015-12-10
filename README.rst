@@ -41,8 +41,7 @@ Where config.conf can use that structure:
     suffix = .0.gz
     key_suffix = .gz
     directory = /var/log/nginx/
-    filename = <filename, default=now.strftime("%Y-%m-%d")>
-
+    filename = <filename, default=(yesterday as yyyy-mm-dd)>
 
     [map]
 
