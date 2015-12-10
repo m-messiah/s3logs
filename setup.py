@@ -4,7 +4,7 @@ from os.path import join, dirname
 
 setup(
     name='s3logs',
-    version='1.0',
+    version='1.1',
     packages=[''],
     url='https://github.com/m-messiah/s3logs',
     license='MIT',
@@ -13,7 +13,7 @@ setup(
     description='Push logs to S3',
     long_description=open(join(dirname(__file__), 'README.rst')).read(),
     scripts=["s3logs"],
-    install_requires=["boto"],
+    install_requires=["boto", 'filechunkio'],
     keywords='logs s3 nginx',
     classifiers=[
         # How mature is this project? Common values are

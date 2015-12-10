@@ -1,11 +1,16 @@
 #!/usr/bin/env python
 # coding=utf-8
+import logging
+from datetime import datetime
+from math import ceil
+from os import listdir, path, stat
+from platform import node
+from sys import argv
+
 from boto.exception import S3ResponseError
 from boto.s3.connection import S3Connection, OrdinaryCallingFormat
-from datetime import datetime
-from os import listdir, path
-from sys import argv
-import logging
+from filechunkio import FileChunkIO
+
 try:
     from configparser import SafeConfigParser, Error as parseError
 except ImportError:
@@ -14,11 +19,14 @@ except ImportError:
 
 class S3Pusher(object):
     def __init__(self, config):
+        self.hostname = node()
         self.suffix = ".0.gz"
+        self.key_suffix = ".gz"
         self.directory = "."
-        self.date = datetime.now().strftime("%Y-%m-%d")
+        self.filename = datetime.now().strftime("%Y-%m-%d")
         self.bucket = None
         self.map = {}
+        self.chunk_size = 52428800
         self.connect(config)
 
     def connect(self, config):
@@ -28,6 +36,12 @@ class S3Pusher(object):
             logging.debug("conf (%s) parsed" % configs)
             self.directory = configs.get("logs", "directory")
             self.suffix = configs.get("logs", "suffix")
+            if configs.has_option("S3", "chunk_size"):
+                self.chunk_size = configs.getint("S3", "chunk_size")
+            if configs.has_option("logs", "filename"):
+                self.filename = configs.get("logs", "filename")
+            if configs.has_option("logs", "key_suffix"):
+                self.key_suffix = configs.get("logs", "key_suffix")
             self.map = dict(configs.items("map"))
             conn = S3Connection(
                 aws_access_key_id=configs.get("S3", "access_key"),
@@ -51,22 +65,34 @@ class S3Pusher(object):
             exit(1)
 
     def list_candidates(self):
-        candidates = [filename for filename in listdir(self.directory)
+        candidates = [filename.lower() for filename in listdir(self.directory)
                       if filename.endswith(self.suffix) and
-                      filename[:filename.find(self.suffix)] in self.map]
+                      filename[:filename.find(self.suffix)].lower() in self.map]
         logging.info("Found %s candidates at %s"
                      % (len(candidates), self.directory))
         return candidates
 
     def push_file(self, filename):
-        key = self.bucket.new_key(
-            path.join(self.map[filename[:filename.find(self.suffix)]],
-                      self.date + ".gz")
+        key_name = path.join(
+            self.hostname,
+            self.map[filename[:filename.find(self.suffix)]],
+            self.filename + self.key_suffix
         )
-        key.set_contents_from_filename(
-            path.join(self.directory, filename)
-        )
-        logging.debug("%s uploaded as %s" % (filename, key.name))
+        key = self.bucket.initiate_multipart_upload(key_name)
+        source_path = path.join(self.directory, filename)
+        source_size = stat(source_path).st_size
+        chunk_count = int(ceil(source_size / float(self.chunk_size)))
+        logging.debug("%s uploading as %s. %d chunks"
+                      % (filename, key_name, chunk_count))
+        for i in range(chunk_count):
+            offset = self.chunk_size * i
+            amount = min(self.chunk_size, source_size - offset)
+            with FileChunkIO(source_path, 'r',
+                             offset=offset, bytes=amount) as fp:
+                key.upload_part_from_file(fp, part_num=i + 1)
+
+        key.complete_upload()
+        logging.debug("%s uploaded" % filename)
 
     def push_candidates(self):
         for filename in self.list_candidates():

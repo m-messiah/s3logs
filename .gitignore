@@ -4,3 +4,5 @@ MAINFEST
 build
 dist
 *.conf
+MANIFEST
+tmp

@@ -1,8 +1,20 @@
 S3 Logs Pusher
 ==============
 
+.. image:: https://img.shields.io/pypi/v/s3logs.svg?style=flat-square
+    :target: https://pypi.python.org/pypi/s3logs
+
+
+
+.. image:: https://img.shields.io/pypi/dm/s3logs.svg?style=flat-square
+        :target: https://pypi.python.org/pypi/s3logs
+
+Get files from directory by mask and push them to S3
+
 Install
 -------
+
+.. code:: bash
 
     pip install s3logs
 
@@ -22,11 +34,15 @@ Where config.conf can use that structure:
     secret_key = <S3_SECRET_KEY>
     host = <s3.example.com>
     bucket = <bucket_name>
+    chunk_size = <bytes, default=52428800>
 
     [logs]
 
     suffix = .0.gz
+    key_suffix = .gz
     directory = /var/log/nginx/
+    filename = <filename, default=now.strftime("%Y-%m-%d")>
+
 
     [map]
 
@@ -37,6 +53,8 @@ Where config.conf can use that structure:
 When it used with that config, script takes all files in directory `/var/log/nginx/`, filter only those, which ends with `.0.gz` and send it to S3, according to map.
 
 For example, /var/log/nginx now consists of:
+
+.. code::
 
     example.com-access.log
     example.com-access.log.0.gz
@@ -49,10 +67,14 @@ For example, /var/log/nginx now consists of:
     mysite.me.error.log
     mysite.me.error.log.0.gz
 
-So, if today is 9 December 2015, on your S3 `<bucket_name>` would be those keys:
+So, if today is 9 December 2015, and your hostname is node1, on your S3 `<bucket_name>` would be those keys:
 
-    example/access/2015-12-09.gz
-    example/error/2015-12-09.gz
-    mysite/access/2015-12-09.gz
+.. code::
 
-Because we have not explain how maps mysite.me.error.log.0.gz - it was skipped.
+    node1/example/access/2015-12-09.gz
+    node1/example/error/2015-12-09.gz
+    node1/mysite/access/2015-12-09.gz
+
+Because we have not explain how maps mysite.me.error.log.0.gz - it would be skipped.
+
+If there was filename=newfile option in config.conf, keys in S3 would look like `node1/example/access/newfile.gz`
