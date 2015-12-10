@@ -49,21 +49,21 @@ class S3Pusher(object):
 
     def list_candidates(self):
         candidates = [filename for filename in listdir(self.directory)
-                      if filename.endswith(self.suffix)]
+                      if filename.endswith(self.suffix) and
+                      filename[:filename.find(self.suffix)] in self.map]
         logging.info("Found %s candidates at %s"
                      % (len(candidates), self.directory))
         return candidates
 
     def push_file(self, filename):
-        app = filename[:filename.find(self.suffix)]
-        if app in self.map:
-            key = self.bucket.new_key(
-                path.join(self.map[app], self.date + ".gz")
-            )
-            key.set_contents_from_filename(
-                path.join(self.directory, filename)
-            )
-            logging.debug("%s uploaded as %s" % (filename, key.name))
+        key = self.bucket.new_key(
+            path.join(self.map[filename[:filename.find(self.suffix)]],
+                      self.date + ".gz")
+        )
+        key.set_contents_from_filename(
+            path.join(self.directory, filename)
+        )
+        logging.debug("%s uploaded as %s" % (filename, key.name))
 
     def push_candidates(self):
         for filename in self.list_candidates():
