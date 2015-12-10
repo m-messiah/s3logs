@@ -1,0 +1,2 @@
+include s3logs
+include README.rst
