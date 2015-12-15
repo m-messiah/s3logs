@@ -11,9 +11,10 @@ from platform import node
 from math import ceil
 
 try:
-    from configparser import SafeConfigParser, Error as parseError
+    from ConfigParser import (SafeConfigParser as ConfigParser,
+                              Error as parseError)
 except ImportError:
-    from ConfigParser import SafeConfigParser, Error as parseError
+    from configparser import ConfigParser, Error as parseError
 
 
 class S3Pusher(object):
