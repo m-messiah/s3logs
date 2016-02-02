@@ -41,6 +41,7 @@ Where config.conf can use that structure:
     suffix = .gz
     key_suffix = .gz
     directory = /var/log/nginx/
+    depth = 30
 
     [map]
 
@@ -78,3 +79,5 @@ So, if today is 9 December 2015, and your hostname is node1, on your S3 `<bucket
 Because we have not explain how maps mysite.me.error.log.0.gz - it would be skipped.
 
 Script also checks whether file exists in S3 and push only those, which are not.
+
+Parameter `depth` stops pushing, if filename is older, than `.<depth>.gz`
