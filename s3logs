@@ -17,17 +17,28 @@ except ImportError:
     from configparser import ConfigParser, Error as parseError
 
 
+def get_map_key(filename):
+    return filename[:filename.rfind('.', 0, filename.rfind('.'))].lower()
+
+
 class S3Pusher(object):
     def __init__(self, config):
         self.hostname = node()
-        self.suffix = ".0.gz"
+        self.suffix = ".gz"
         self.key_suffix = ".gz"
         self.directory = "."
-        self.filename = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
+        self.today = date.today()
         self.bucket = None
         self.map = {}
         self.chunk_size = 52428800
         self.connect(config)
+
+    def get_filename(self, filename):
+        index = int(filename[filename.rfind('.', 0, filename.rfind('.')) + 1:
+                             filename.rfind('.')])
+        return (
+            self.today - timedelta(days=1 + index)
+        ).strftime("%Y-%m-%d") + self.key_suffix
 
     def connect(self, config):
         configs = ConfigParser()
@@ -38,8 +49,6 @@ class S3Pusher(object):
             self.suffix = configs.get("logs", "suffix")
             if configs.has_option("S3", "chunk_size"):
                 self.chunk_size = configs.getint("S3", "chunk_size")
-            if configs.has_option("logs", "filename"):
-                self.filename = configs.get("logs", "filename")
             if configs.has_option("logs", "key_suffix"):
                 self.key_suffix = configs.get("logs", "key_suffix")
             self.map = dict(configs.items("map"))
@@ -66,7 +75,7 @@ class S3Pusher(object):
     def list_candidates(self):
         candidates = [filename.lower() for filename in listdir(self.directory)
                       if filename.endswith(self.suffix) and
-                      filename[:filename.find(self.suffix)].lower() in self.map]
+                      get_map_key(filename) in self.map]
         logging.info("Found %s candidates at %s"
                      % (len(candidates), self.directory))
         return candidates
@@ -74,9 +83,13 @@ class S3Pusher(object):
     def push_file(self, filename):
         key_name = path.join(
             self.hostname,
-            self.map[filename[:filename.find(self.suffix)]],
-            self.filename + self.key_suffix
+            self.map[get_map_key(filename)],
+            self.get_filename(filename)
         )
+        if self.bucket.get_key(key_name):
+            logging.debug("%s exists" % filename)
+            return
+
         key = self.bucket.initiate_multipart_upload(key_name)
         source_path = path.join(self.directory, filename)
         source_size = stat(source_path).st_size

@@ -38,10 +38,9 @@ Where config.conf can use that structure:
 
     [logs]
 
-    suffix = .0.gz
+    suffix = .gz
     key_suffix = .gz
     directory = /var/log/nginx/
-    filename = <filename, default=(yesterday as yyyy-mm-dd)>
 
     [map]
 
@@ -49,7 +48,7 @@ Where config.conf can use that structure:
     example.com-error.log = example/error
     mysite.me.access.log = mysite/access
 
-When it used with that config, script takes all files in directory `/var/log/nginx/`, filter only those, which ends with `.0.gz` and send it to S3, according to map.
+When it used with that config, script takes all files in directory `/var/log/nginx/`, filter only those, which ends with `.gz` and send it to S3, according to map.
 
 For example, /var/log/nginx now consists of:
 
@@ -71,9 +70,11 @@ So, if today is 9 December 2015, and your hostname is node1, on your S3 `<bucket
 .. code::
 
     node1/example/access/2015-12-09.gz
+    node1/example/access/2015-12-08.gz
     node1/example/error/2015-12-09.gz
+    node1/example/error/2015-12-08.gz
     node1/mysite/access/2015-12-09.gz
 
 Because we have not explain how maps mysite.me.error.log.0.gz - it would be skipped.
 
-If there was filename=newfile option in config.conf, keys in S3 would look like `node1/example/access/newfile.gz`
+Script also checks whether file exists in S3 and push only those, which are not.
