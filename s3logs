@@ -30,7 +30,7 @@ class S3Pusher(object):
         self.connect(config)
 
     def connect(self, config):
-        configs = SafeConfigParser()
+        configs = ConfigParser()
         try:
             configs.read(config)
             logging.debug("conf (%s) parsed" % configs)
