@@ -1,0 +1,19 @@
+branches:
+  only:
+  - master
+language: python
+python:
+- '2.7'
+- '3.3'
+- '3.4'
+- '3.5'
+cache: pip
+sudo: false
+install: pip install -q -e .
+script: python setup.py test
+deploy:
+  provider: pypi
+  distributions: "sdist bdist"
+  user: m_messiah
+  password:
+    secure: "OQMaQmpake3q4UEJ7DKOcsIEd3POhEyOiOdNwnmiJzNpi7pdg6tbqV+9iuVmUP0lAkZDu7xukFZTslqD3YAeeVDUSmtqW49e1vt/sub0MQ93ThEwcb5msZmRVIF0iOb2uB5ArwbZTvwqdoG0T+q1Nhgc9tWODNbTkyL3IyNO3s0="
