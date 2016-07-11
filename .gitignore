@@ -4,6 +4,7 @@ MAINFEST
 build
 dist
 *.conf
+!test.conf
 MANIFEST
 tmp
 /s3logs.egg-info/
