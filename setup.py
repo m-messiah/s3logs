@@ -4,7 +4,7 @@ from os.path import join, dirname
 
 setup(
     name='s3logs',
-    version='1.6',
+    version='1.7',
     packages=[''],
     url='https://github.com/m-messiah/s3logs',
     license='MIT',
@@ -34,7 +34,6 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
