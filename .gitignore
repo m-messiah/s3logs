@@ -9,3 +9,5 @@ MANIFEST
 tmp
 /s3logs.egg-info/
 /env/
+
+/.eggs/

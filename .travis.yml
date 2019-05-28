@@ -6,6 +6,8 @@ python:
 cache: pip
 sudo: false
 install: pip install -q -e .
+env:
+  - BOTO_CONFIG=/dev/null
 script: python setup.py test
 deploy:
   provider: pypi
