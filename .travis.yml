@@ -1,12 +1,8 @@
-branches:
-  only:
-  - master
 language: python
 python:
-- '2.7'
-- '3.3'
-- '3.4'
-- '3.5'
+  - '2.7'
+  - '3.5'
+  - '3.6'
 cache: pip
 sudo: false
 install: pip install -q -e .
@@ -17,3 +13,6 @@ deploy:
   user: m_messiah
   password:
     secure: "YGfvZr4mFjU4Dl9MY6f92B9cZ09X9FsIafY5oVpDcedQlAJZX1Z9x+BjzAcPw0L7Ksgi5C+ji+46si60hUk9t5OkThCsvO45nFwVhc/HT0tuPEpVWNbkVyHN8TWPEkFo9ZbMO8CCPuJZwxkbSX0Fb7q03/ojyP7uVfnYZ5fs8om8ZJ4y3H7mmc1OPwvgYdScnv+Jk9Ptyp4yOADg7eWZPSo/dhKevQhflawx4HYXHAk3xGq4BRIytC9GjOvNu1aNZhSuTce9bbtn8NSdf8xScls8K/0ed2C/Wh2ln7DhMaIrx05u+uC1qGzbClZoO0bGPj5XpwYSk6fNaOkQGNRXgyTIFibiqptaeOXrdK1yI8KntPSMUXcWq+7beMgpAW03ddoHpGTf74/8m2mObxR6dX3sRwhDL1xLkdc2X9ifyBLoYHSf+jd+6Y5Y38jCi7uN3PzsJZ6eRq8UfsrsUN1E/O3NpYgraKsVacnXyuGssNYLlnwvqqmcxFchYz60qnGhEFSw7M8hz2JJfubS9Wqf/AkwpHk4dB9+BWqPOWV0GE6paq9s/zPlNKUYSfKhyotX+dsHsvEY8cXmiwbXR0qAk6Hub980+lC05YBCJFaSrqckPfA4ozsfSJglE93ZXvudzuTiYqHb8Csd92vXS9gWX+YgYoe/Ykc8iggHqtvl0Xo="
+  on:
+    repo: m-messiah/s3logs
+    tags: true
