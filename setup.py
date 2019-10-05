@@ -12,7 +12,10 @@ setup(
     author_email='m.muzafarov@gmail.com',
     description='Push logs to S3',
     long_description=open(join(dirname(__file__), 'README.rst')).read(),
-    scripts=["s3logs"],
+    entry_points='''
+        [console_scripts]
+        s3logs=s3logs:__main__
+    ''',
     test_suite="tests",
     install_requires=["boto", 'filechunkio'],
     keywords='logs s3 nginx',
