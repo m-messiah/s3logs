@@ -34,15 +34,31 @@ class S3Pusher(object):
         self.suffix = ".gz"
         self.today = date.today()
         self.read_config(config)
+        self.dateext_latest = (
+            self.today - timedelta(days=self.depth)
+        ).isoformat()
 
-    def get_filename(self, filename):
-        index = int(filename[filename.rfind('.', 0, filename.rfind('.')) + 1:
-                             filename.rfind('.')])
+    def get_dest_suffix(self, filename):
+        try:
+            index_part = filename[
+                filename.rfind('.', 0, filename.rfind('.')) + 1:
+                filename.rfind('.')
+            ]
+            index = int(index_part)
+        except ValueError:
+            if index_part < self.dateext_latest:
+                return None
+            return index_part + self.key_suffix
+
+        if index < 0:
+            return None
+
         if index > self.depth:
             return None
+
         return (
             self.today - timedelta(days=1 + index)
-        ).strftime("%Y-%m-%d") + self.key_suffix
+        ).isoformat() + self.key_suffix
 
     def read_config(self, config):
         configs = ConfigParser()
@@ -88,12 +104,14 @@ class S3Pusher(object):
         return candidates
 
     def push_file(self, filename):
-        if not self.get_filename(filename):
+        dest_suffix = self.get_dest_suffix(filename)
+        if not dest_suffix:
             return None
+
         key_name = path.join(
             self.hostname,
             self.map[get_map_key(filename)],
-            self.get_filename(filename)
+            dest_suffix
         )
         if self.bucket.get_key(key_name):
             logging.debug("%s exists" % filename)
