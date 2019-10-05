@@ -4,7 +4,7 @@ from os.path import join, dirname
 
 setup(
     name='s3logs',
-    version='1.7',
+    version='1.8',
     py_modules=['s3logs'],
     url='https://github.com/m-messiah/s3logs',
     license='MIT',
