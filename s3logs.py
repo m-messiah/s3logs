@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 # coding=utf-8
-from filechunkio import FileChunkIO
-from boto.exception import S3ResponseError
-from boto.s3.connection import S3Connection, OrdinaryCallingFormat
-from datetime import date, timedelta
-from os import listdir, path, stat
 import logging
-from platform import node
+from datetime import date, timedelta
 from math import ceil
+from os import listdir, path, stat
+from platform import node
+from sys import argv
+
+from boto.exception import S3ResponseError
+from boto.s3.connection import OrdinaryCallingFormat, S3Connection
+from filechunkio import FileChunkIO
 
 try:
     from ConfigParser import (SafeConfigParser as ConfigParser,
@@ -120,3 +122,27 @@ class S3Pusher(object):
         for filename in self.list_candidates():
             self.push_file(filename)
 
+
+def __main__():
+    if len(argv) < 2:
+        logging.error("Usage %s [-v] config_file.conf" % argv[0])
+        exit(1)
+
+    if len(argv) > 2:
+        if argv[1] == "-v":
+            pusher = S3Pusher(argv[2])
+            logging.getLogger().setLevel(logging.DEBUG)
+        elif argv[2] == "-v":
+            pusher = S3Pusher(argv[1])
+            logging.getLogger().setLevel(logging.DEBUG)
+        else:
+            pusher = None
+            logging.error("Usage %s [-v] config_file.conf" % argv[0])
+            exit(2)
+    else:
+        if argv[1] == "-v":
+            logging.error("Usage %s [-v] config_file.conf" % argv[0])
+            exit(2)
+        pusher = S3Pusher(argv[1])
+
+    pusher.push_candidates()
