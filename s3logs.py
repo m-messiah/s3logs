@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # coding=utf-8
+import argparse
 import logging
 from datetime import date, timedelta
 from math import ceil
 from os import listdir, path, stat
 from platform import node
-from sys import argv
 
 from boto.exception import S3ResponseError
 from boto.s3.connection import OrdinaryCallingFormat, S3Connection
@@ -52,10 +52,7 @@ class S3Pusher(object):
                 return None
             return index_part + self.key_suffix
 
-        if index < 0:
-            return None
-
-        if index > self.depth:
+        if index < 0 or index > self.depth:
             return None
 
         return (
@@ -142,25 +139,12 @@ class S3Pusher(object):
 
 
 def __main__():
-    if len(argv) < 2:
-        logging.error("Usage %s [-v] config_file.conf" % argv[0])
-        exit(1)
+    parser = argparse.ArgumentParser(description='S3 Logs Pusher')
+    parser.add_argument('-v', '--verbose', action="store_true", help='Verbose mode')
+    parser.add_argument("config_file", type=str, help="Path to config file")
+    args = parser.parse_args()
+    if args.verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
 
-    if len(argv) > 2:
-        if argv[1] == "-v":
-            pusher = S3Pusher(argv[2])
-            logging.getLogger().setLevel(logging.DEBUG)
-        elif argv[2] == "-v":
-            pusher = S3Pusher(argv[1])
-            logging.getLogger().setLevel(logging.DEBUG)
-        else:
-            pusher = None
-            logging.error("Usage %s [-v] config_file.conf" % argv[0])
-            exit(2)
-    else:
-        if argv[1] == "-v":
-            logging.error("Usage %s [-v] config_file.conf" % argv[0])
-            exit(2)
-        pusher = S3Pusher(argv[1])
-
+    pusher = S3Pusher(args.config_file)
     pusher.push_candidates()
